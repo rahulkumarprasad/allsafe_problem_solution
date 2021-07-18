@@ -1,0 +1,1 @@
+web: gunicorn AllSafe_Technologies_Pvt_Ltd_solving.wsgi

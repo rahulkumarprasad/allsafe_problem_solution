@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.4.1/dist/chart.min.js"></script>
+    <title>Allsafe Web Status</title>
+</head>
+<body>
+    {% csrf_token %}
+    <div class="containe_fluid  bg-info p-2 mb-5">
+        <h4 class="text-center text-light">AllSafe Website Status Graph</h4>
+        <a class="text-light border border-light p-1" onclick="javascript:location.reload();">home</a>
+    </div>
+    <div class="container-fluid mb-5">
+        <label >See Previous Data : </label>
+        <input type="date" id="select_date" onchange="get_date_wise_data(event)">
+        <button class="btn btn-success m-2 " onclick="start_today_process()">Continue Today Process</button>
+    </div>
+    <div class="container ">
+        <canvas id="myChart" width="" height="90"></canvas>
+    </div>
+    <div class="container row p-2 my-2">
+        <div class="col-md-6">
+        <label class="float-left float-md-right ml-0"><span style=" width: 10px;height: 20px;background-color: lightblue;color: lightblue;">s</span> Total Uptime : <span id="total_uptime" class="font-weight-bold">0</span></label>
+        </div>
+        <div class="col-md-6">
+        
+        <label><span style=" width: 10px;height: 20px;background-color: pink;color: pink;">s</span> Total Downtime : <span id="total_downtime" class="font-weight-bold">0</span></label>
+        </div>
+    </div>
+    <script>
+
+var intrval=null;
+start_today_process();
+
+function set_interval(){
+    intrval=setInterval(() =>{
+   let csrfmiddlewaretoken=$("[name=csrfmiddlewaretoken]").val();
+    $.ajax({
+    method:"GET",
+    url:"{% url 'getinfo' %}",
+    data:{csrfmiddlewaretoken},
+    success:(response)=>{
+        if(response!=null){
+            response=JSON.parse(response);
+            $("#total_uptime").html(response["uptime"]);
+            $("#total_downtime").html(response["downtime"]);
+            myChart.data.datasets[0].data[0]=response["uptime"];
+            myChart.data.datasets[0].data[1]=response["downtime"];
+            myChart.update();
+        }
+        else{
+            alert("error");
+        }
+    }
+
+   });
+    
+},1000);
+
+}
+
+var myChart=null;
+start_graph();
+function start_graph(obj=null){
+    var ctx = document.getElementById('myChart').getContext('2d');
+myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Uptime', 'Downtime'],
+        datasets: [{
+            label: 'Allsafe Webste Status',
+            data: [12, 19],
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 99, 132, 0.2)'
+                
+            ],
+            borderColor: [
+            'rgba(54, 162, 235, 1)',    
+            'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        plugins: {
+      datalabels: {
+         display: true,
+         align: 'center',
+         anchor: 'center'
+      }
+   },
+        indexAxis: 'y',
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+}
+
+function get_date_wise_data(e){
+    if(intrval!=null){
+    clearInterval(intrval);
+    intrval=null;
+    }
+
+    let csrfmiddlewaretoken=$("[name=csrfmiddlewaretoken]").val();
+    $.ajax({
+    method:"GET",
+    url:"{% url 'getdatewise' %}",
+    data:{csrfmiddlewaretoken,date:e.target.value},
+    success:(response)=>{
+        if(response!=null){
+            
+            response=JSON.parse(response);
+            $("#total_uptime").html(response["uptime"]);
+            myChart.data.datasets[0].data[0]=response["uptime"];
+            myChart.data.datasets[0].data[1]=response["downtime"];
+            $("#total_downtime").html(response["downtime"]);
+            myChart.update();
+        }
+        else{
+            alert("error");
+        }
+    }
+
+   });
+
+}
+
+function start_today_process(){
+    date=new Date();
+    $("#select_date").val(date.toLocaleDateString("en-CA"));
+    if(intrval==null){
+    set_interval();
+    }
+    
+}
+
+        </script>
+</body>
+</html>
