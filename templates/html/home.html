@@ -17,10 +17,17 @@
         <h4 class="text-center text-light">AllSafe Website Status Graph</h4>
         <a class="text-light border border-light p-1" onclick="javascript:location.reload();">home</a>
     </div>
-    <div class="container-fluid mb-5">
-        <label >See Previous Data : </label>
+    <div class="row mb-5 m-2 p-2">
+        <button class="btn btn-success my-1" onclick="start_today_process()">Continue Today Process</button>
+        <div class="col-md-4 my-1">
+        <label></label>See Previous Data : </label>
         <input type="date" id="select_date" onchange="get_date_wise_data(event)">
-        <button class="btn btn-success m-2 " onclick="start_today_process()">Continue Today Process</button>
+        </div>
+        <div class="col-md-4 my-1">
+        <label >Url : </label>
+        <input type="text" id="url" value="https://allsafe.in/" placeholder="Url">
+        </div>
+        
     </div>
     <div class="container ">
         <canvas id="myChart" width="" height="90"></canvas>
@@ -41,10 +48,14 @@ var intrval=null;
 function set_interval(){
     intrval=setInterval(() =>{
    let csrfmiddlewaretoken=$("[name=csrfmiddlewaretoken]").val();
+   let url=$("#url").val();
+   if(url.trim()==""){
+       url="https://allsafe.in/";
+   }
     $.ajax({
     method:"GET",
     url:"{% url 'getinfo' %}",
-    data:{csrfmiddlewaretoken},
+    data:{csrfmiddlewaretoken,url},
     success:(response)=>{
         if(response!=null){
             response=JSON.parse(response);

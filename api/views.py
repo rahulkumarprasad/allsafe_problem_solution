@@ -10,6 +10,8 @@ class AllSafeWebInfo(View):
         today_date=datetime.now().date()
         http = urllib3.PoolManager()
         url=request.GET.get("url","https://allsafe.in/")
+        if url.strip()=="":
+            url="https://allsafe.in/"
         res = http.request('GET', url)
         status=res.status
         json_resp={"uptime":0,"downtime":0,"url":url}
