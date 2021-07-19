@@ -7,43 +7,45 @@ import json
 
 class AllSafeWebInfo(View):
     def get(self,request):
-        today_date=datetime.now().date()
-        http = urllib3.PoolManager()
-        url=request.GET.get("url","https://allsafe.in/")
-        if url.strip()=="":
-            url="https://allsafe.in/"
-        res = http.request('GET', url)
-        status=res.status
-        json_resp={"uptime":0,"downtime":0,"url":url}
-        if status == 200 or status == 500:
-            get_old_record=AllsafeWebsite.objects.filter(date=today_date,status=status)
-            if len(get_old_record) == 0:
-                AllsafeWebsite(status=status,total_request=1).save()
-                get_old_record=AllsafeWebsite.objects.filter(status=status,total_request=1)
+        try:
+            today_date=datetime.now().date()
+            http = urllib3.PoolManager()
+            url=request.GET.get("url","https://allsafe.in/")
+            if url.strip()=="":
+                url="https://allsafe.in/"
+            res = http.request('GET', url)
+            status=res.status
+            json_resp={"uptime":0,"downtime":0,"url":url}
+            if status == 200 or status == 500:
+                get_old_record=AllsafeWebsite.objects.filter(date=today_date,status=status)
+                if len(get_old_record) == 0:
+                    AllsafeWebsite(status=status,total_request=1).save()
+                    get_old_record=AllsafeWebsite.objects.filter(status=status,total_request=1)
 
-            else:
-                get_old_record[0].total_request=int(get_old_record[0].total_request)+int(1)
-                get_old_record[0].save()
+                else:
+                    get_old_record[0].total_request=int(get_old_record[0].total_request)+int(1)
+                    get_old_record[0].save()
+                    
                 
-            
-            if get_old_record[0].status == 200:
-                json_resp["uptime"]=get_old_record[0].total_request
-                json_resp["downtime"]=AllsafeWebsite.objects.filter(date=today_date,status=500)
-                if len(json_resp["downtime"])==0:
-                    json_resp["downtime"]=0
+                if get_old_record[0].status == 200:
+                    json_resp["uptime"]=get_old_record[0].total_request
+                    json_resp["downtime"]=AllsafeWebsite.objects.filter(date=today_date,status=500)
+                    if len(json_resp["downtime"])==0:
+                        json_resp["downtime"]=0
+                    else:
+                        json_resp["downtime"]=json_resp["downtime"][0].total_request
+
                 else:
-                    json_resp["downtime"]=json_resp["downtime"][0].total_request
+                    json_resp["downtime"]=get_old_record[0].total_request
+                    json_resp["uptime"]=AllsafeWebsite.objects.filter(date=today_date,status=200)
+                    if len(json_resp["uptime"]) == 0:
+                        json_resp["uptime"]=0
+                    else:
+                        json_resp["uptime"]=json_resp["uptime"][0].total_request
 
-            else:
-                json_resp["downtime"]=get_old_record[0].total_request
-                json_resp["uptime"]=AllsafeWebsite.objects.filter(date=today_date,status=200)
-                if len(json_resp["uptime"]) == 0:
-                    json_resp["uptime"]=0
-                else:
-                    json_resp["uptime"]=json_resp["uptime"][0].total_request
-
-        return HttpResponse(json.dumps(json_resp))
-
+            return HttpResponse(json.dumps(json_resp))
+        except Exception as e:
+            return HttpResponse(json.dumps({"uptime":0,"downtime":0,"url":url}))
 class HomePage(View):
     def get(self,request):
         return render(request,"html/home.html")
