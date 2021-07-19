@@ -37,7 +37,6 @@
     <script>
 
 var intrval=null;
-start_today_process();
 
 function set_interval(){
     intrval=setInterval(() =>{
@@ -65,7 +64,6 @@ function set_interval(){
 },1000);
 
 }
-
 var myChart=null;
 start_graph();
 function start_graph(obj=null){
@@ -105,7 +103,7 @@ myChart = new Chart(ctx, {
         }
     }
 });
-
+set_interval();
 }
 
 function get_date_wise_data(e){
