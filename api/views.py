@@ -23,6 +23,5 @@ class GetDateWiseData(View):
     def get(self,request):
         today_date=datetime.now().date()
         date=request.GET.get("date",today_date)
-        
         json_res={"uptime":get_count(date,200),"downtime":get_count(date,500)}
         return HttpResponse(json.dumps(json_res))
