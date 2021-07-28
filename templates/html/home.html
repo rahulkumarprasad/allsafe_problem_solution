@@ -23,10 +23,6 @@
         <label></label>See Previous Data : </label>
         <input type="date" id="select_date" onchange="get_date_wise_data(event)">
         </div>
-        <div class="col-md-4 my-1">
-        <label >Url : </label>
-        <input type="text" id="url" value="https://allsafe.in/" placeholder="Url">
-        </div>
         
     </div>
     <div class="container ">
@@ -51,14 +47,11 @@ var intrval=null;
 function set_interval(){
     intrval=setInterval(() =>{
    let csrfmiddlewaretoken=$("[name=csrfmiddlewaretoken]").val();
-   let url=$("#url").val();
-   if(url.trim()==""){
-       url="https://allsafe.in/";
-   }
+   
     $.ajax({
     method:"GET",
     url:"{% url 'getinfo' %}",
-    data:{csrfmiddlewaretoken,url},
+    data:{csrfmiddlewaretoken},
     success:(response)=>{
         if(response!=null){
             response=JSON.parse(response);
@@ -141,6 +134,7 @@ function get_date_wise_data(e){
             myChart.data.datasets[0].data[0]=response["uptime"];
             myChart.data.datasets[0].data[1]=response["downtime"];
             $("#total_downtime").html(response["downtime"]);
+            $("#total_request").html(parseInt(response["uptime"])+parseInt(response["downtime"]));
             myChart.update();
         }
         else{

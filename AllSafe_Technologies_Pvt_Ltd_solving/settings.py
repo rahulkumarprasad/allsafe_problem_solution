@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-re1p6w&dy#cl0^-02y97550)^rk!27$p&gz%@%b)e3hqmvw3d+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +131,7 @@ STATIC_ROOT=os.path.join(BASE_DIR,"static")
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRONJOBS=[
+    ('*/1 * * * *','api.cron.get_status_code')
+]
